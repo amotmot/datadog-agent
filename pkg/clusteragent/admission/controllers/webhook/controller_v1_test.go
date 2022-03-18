@@ -180,8 +180,9 @@ func TestGenerateTemplatesV1(t *testing.T) {
 							Operator: metav1.LabelSelectorOpNotIn,
 							Values:   []string{"false"},
 						},
+						azureAKSLabelSelectorReq(),
 					},
-				}, nil)
+				}, azureAKSLabelSelector())
 				return []admiv1.MutatingWebhook{webhook}
 			},
 		},
@@ -198,7 +199,10 @@ func TestGenerateTemplatesV1(t *testing.T) {
 					MatchLabels: map[string]string{
 						"admission.datadoghq.com/enabled": "true",
 					},
-				}, nil)
+					MatchExpressions: []metav1.LabelSelectorRequirement{
+						azureAKSLabelSelectorReq(),
+					},
+				}, azureAKSLabelSelector())
 				return []admiv1.MutatingWebhook{webhook}
 			},
 		},
@@ -218,8 +222,9 @@ func TestGenerateTemplatesV1(t *testing.T) {
 							Operator: metav1.LabelSelectorOpNotIn,
 							Values:   []string{"false"},
 						},
+						azureAKSLabelSelectorReq(),
 					},
-				}, nil)
+				}, azureAKSLabelSelector())
 				return []admiv1.MutatingWebhook{webhook}
 			},
 		},
@@ -236,7 +241,10 @@ func TestGenerateTemplatesV1(t *testing.T) {
 					MatchLabels: map[string]string{
 						"admission.datadoghq.com/enabled": "true",
 					},
-				}, nil)
+					MatchExpressions: []metav1.LabelSelectorRequirement{
+						azureAKSLabelSelectorReq(),
+					},
+				}, azureAKSLabelSelector())
 				return []admiv1.MutatingWebhook{webhook}
 			},
 		},
@@ -252,12 +260,18 @@ func TestGenerateTemplatesV1(t *testing.T) {
 					MatchLabels: map[string]string{
 						"admission.datadoghq.com/enabled": "true",
 					},
-				}, nil)
+					MatchExpressions: []metav1.LabelSelectorRequirement{
+						azureAKSLabelSelectorReq(),
+					},
+				}, azureAKSLabelSelector())
 				webhookTags := webhook("datadog.webhook.tags", "/injecttags", &metav1.LabelSelector{
 					MatchLabels: map[string]string{
 						"admission.datadoghq.com/enabled": "true",
 					},
-				}, nil)
+					MatchExpressions: []metav1.LabelSelectorRequirement{
+						azureAKSLabelSelectorReq(),
+					},
+				}, azureAKSLabelSelector())
 				return []admiv1.MutatingWebhook{webhookConfig, webhookTags}
 			},
 		},
@@ -277,8 +291,9 @@ func TestGenerateTemplatesV1(t *testing.T) {
 							Operator: metav1.LabelSelectorOpNotIn,
 							Values:   []string{"false"},
 						},
+						azureAKSLabelSelectorReq(),
 					},
-				}, nil)
+				}, azureAKSLabelSelector())
 				webhookTags := webhook("datadog.webhook.tags", "/injecttags", &metav1.LabelSelector{
 					MatchExpressions: []metav1.LabelSelectorRequirement{
 						{
@@ -286,8 +301,9 @@ func TestGenerateTemplatesV1(t *testing.T) {
 							Operator: metav1.LabelSelectorOpNotIn,
 							Values:   []string{"false"},
 						},
+						azureAKSLabelSelectorReq(),
 					},
-				}, nil)
+				}, azureAKSLabelSelector())
 				return []admiv1.MutatingWebhook{webhookConfig, webhookTags}
 			},
 		},
@@ -305,10 +321,16 @@ func TestGenerateTemplatesV1(t *testing.T) {
 					MatchLabels: map[string]string{
 						"admission.datadoghq.com/enabled": "true",
 					},
+					MatchExpressions: []metav1.LabelSelectorRequirement{
+						azureAKSLabelSelectorReq(),
+					},
 				})
 				webhookTags := webhook("datadog.webhook.tags", "/injecttags", nil, &metav1.LabelSelector{
 					MatchLabels: map[string]string{
 						"admission.datadoghq.com/enabled": "true",
+					},
+					MatchExpressions: []metav1.LabelSelectorRequirement{
+						azureAKSLabelSelectorReq(),
 					},
 				})
 				return []admiv1.MutatingWebhook{webhookConfig, webhookTags}
@@ -386,7 +408,7 @@ func TestGetWebhookSkeletonV1(t *testing.T) {
 				path:       "/bar",
 			},
 			namespaceSelector: false,
-			want:              webhook(&defaultTimeout, buildLabelSelector(), nil),
+			want:              webhook(&defaultTimeout, buildLabelSelector(), azureAKSLabelSelector()),
 		},
 		{
 			name: "namespace selector",
@@ -405,7 +427,7 @@ func TestGetWebhookSkeletonV1(t *testing.T) {
 			},
 			timeout:           &customTimeout,
 			namespaceSelector: false,
-			want:              webhook(&customTimeout, buildLabelSelector(), nil),
+			want:              webhook(&customTimeout, buildLabelSelector(), azureAKSLabelSelector()),
 		},
 	}
 	for _, tt := range tests {

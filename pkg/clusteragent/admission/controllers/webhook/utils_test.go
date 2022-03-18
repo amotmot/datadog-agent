@@ -56,3 +56,18 @@ func buildSecret(data map[string][]byte, cfg Config) *corev1.Secret {
 		Data: data,
 	}
 }
+
+func azureAKSLabelSelectorReq() metav1.LabelSelectorRequirement {
+	return metav1.LabelSelectorRequirement{
+		Key:      "control-plane",
+		Operator: metav1.LabelSelectorOpDoesNotExist,
+	}
+}
+
+func azureAKSLabelSelector() *metav1.LabelSelector {
+	return &metav1.LabelSelector{
+		MatchExpressions: []metav1.LabelSelectorRequirement{
+			azureAKSLabelSelectorReq(),
+		},
+	}
+}

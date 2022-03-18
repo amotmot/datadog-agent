@@ -240,5 +240,13 @@ func (c *ControllerV1) getWebhookSkeleton(nameSuffix, path string) admiv1.Mutati
 
 	webhook.ObjectSelector = labelSelector
 
+	// Azure AKS adds this if we don't, so we need to add it to avoid conflicts
+	// when updating the webhook.
+	webhook.NamespaceSelector = &metav1.LabelSelector{
+		MatchExpressions: []metav1.LabelSelectorRequirement{
+			azureAKSLabelSelectorRequirement(),
+		},
+	}
+
 	return webhook
 }

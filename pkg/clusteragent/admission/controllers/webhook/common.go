@@ -17,9 +17,11 @@ import (
 
 // buildLabelSelector returns the mutating webhooks object selector based on the configuration
 func buildLabelSelector() *metav1.LabelSelector {
+	var labelSelector *metav1.LabelSelector
+
 	if config.Datadog.GetBool("admission_controller.mutate_unlabelled") {
 		// Accept all, ignore pods if they're explicitly filtered-out
-		return &metav1.LabelSelector{
+		labelSelector = &metav1.LabelSelector{
 			MatchExpressions: []metav1.LabelSelectorRequirement{
 				{
 					Key:      common.EnabledLabelKey,
@@ -28,12 +30,32 @@ func buildLabelSelector() *metav1.LabelSelector {
 				},
 			},
 		}
+	} else {
+		// Ignore all, accept pods if they're explicitly allowed
+		labelSelector = &metav1.LabelSelector{
+			MatchLabels: map[string]string{
+				common.EnabledLabelKey: "true",
+			},
+		}
 	}
 
-	// Ignore all, accept pods if they're explicitly allowed
-	return &metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			common.EnabledLabelKey: "true",
-		},
+	labelSelector.MatchExpressions = append(
+		labelSelector.MatchExpressions,
+		azureAKSLabelSelectorRequirement(),
+	)
+
+	return labelSelector
+}
+
+// Returns the label selector needed to make webhooks work on Azure AKS.
+// AKS adds this requirement automatically if we don't, so we need to add it to
+// avoid conflicts when updating the webhook.
+//
+// Ref: https://docs.microsoft.com/en-us/azure/aks/faq#can-i-use-admission-controller-webhooks-on-aks
+// Ref: https://github.com/Azure/AKS/issues/1771
+func azureAKSLabelSelectorRequirement() metav1.LabelSelectorRequirement {
+	return metav1.LabelSelectorRequirement{
+		Key:      "control-plane",
+		Operator: metav1.LabelSelectorOpDoesNotExist,
 	}
 }
